@@ -51,7 +51,7 @@ phys_size_t initdram(int board_type)
 {
 	ddr_phy_init();
 	ddr_init();
-	return CONFIG_SYS_MEM_SIZE;
+	return pic32_ddr_size() << 20;
 }
 
 #ifdef CONFIG_SYS_DRAM_TEST

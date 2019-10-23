@@ -62,9 +62,9 @@
 /*****************************************************************************/
 
 /* DDR Address Mapping: CS, ROW, BA, COL */
-#define COL_BITS	10
+#define COL_BITS	(pic32_ddr_size() == 32 ? 9 : 10)
 #define ROW_BITS	13
-#define BA_BITS		3
+#define BA_BITS		(pic32_ddr_size() == 32 ? 2 : 3)
 #define CS_BITS		1
 
 /* DDR constants */
@@ -146,6 +146,21 @@
 #define SCL_START		0x10000000
 #define SCL_EN			0x04000000
 #define SCL_LUBPASS		3
+
+/*
+ * Return DDR size from devcfg register.
+ */
+int pic32_ddr_size(void)
+{
+	uint32_t	*devcfg;
+
+	devcfg = (uint32_t *) CONFIG_DEVCFG_3;
+	if (((*devcfg >> 16) & 0xF) == 5) {
+		return (32);
+	}
+
+	return (128);
+}
 
 void ddr_pmd_unlock(void)
 {
