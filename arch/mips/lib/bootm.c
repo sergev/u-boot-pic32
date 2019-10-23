@@ -93,12 +93,19 @@ static void boot_setup_fdt(bootm_headers_t *images)
 	u64 mem_start = 0;
 	u64 mem_size = gd->ram_size;
 
+#ifdef CONFIG_SOC_PIC32
+	/* In some SoCs SDRAM doesn't start from address zero.
+	 * So fixing memory base at zero will be grossly incorrect.
+	 * Better get mem_start information from board info struct.
+	 */
+	mem_start = gd->bd->bi_memstart;
+#endif
 	debug("## setup FDT\n");
 
-	fdt_chosen(images->ft_addr, 1);
+	fdt_chosen(images->ft_addr);
 	fdt_fixup_memory_banks(images->ft_addr, &mem_start, &mem_size, 1);
 	fdt_fixup_ethernet(images->ft_addr);
-	fdt_initrd(images->ft_addr, images->initrd_start, images->initrd_end, 1);
+	fdt_initrd(images->ft_addr, images->initrd_start, images->initrd_end);
 
 #if defined(CONFIG_OF_BOARD_SETUP)
 	ft_board_setup(images->ft_addr, gd->bd);
@@ -321,7 +328,7 @@ static void boot_jump_linux(bootm_headers_t *images)
 		kernel(-2, (ulong)images->ft_addr, 0, 0);
 	else
 		kernel(linux_argc, (ulong)linux_argv, (ulong)linux_env,
-			linux_extra);
+		       linux_extra);
 }
 
 int do_bootm_linux(int flag, int argc, char * const argv[],
