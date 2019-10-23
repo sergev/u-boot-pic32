@@ -23,6 +23,9 @@
 #define CONFIG_MIPS	        1
 #define CONFIG_MIPS32		1  /* MIPS32 CPU core	*/
 
+/* Configuration words */
+#define CONFIG_DEVCFG_3			0xbfc0ffc0
+
 /* Primary oscillator */
 #define CONFIG_PIC32_POSC_FREQ		24000000
 
@@ -58,7 +61,9 @@
 
 /* SDRAM Configuration (for final code, data, stack, heap) */
 #define CONFIG_SYS_SDRAM_BASE		0x88000000
-#define CONFIG_SYS_MEM_SIZE		(128 << 20) /* 128M */
+#ifndef __ASSEMBLY__
+extern int pic32_ddr_size(void);
+#endif
 
 #define CONFIG_SYS_MALLOC_LEN		(256 << 10)
 #define CONFIG_SYS_BOOTPARAMS_LEN	(4 << 10)
