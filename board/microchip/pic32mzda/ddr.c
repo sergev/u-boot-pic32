@@ -148,18 +148,57 @@
 #define SCL_LUBPASS		3
 
 /*
- * Return DDR size from devcfg register.
+ * Return DDR size based on DEVID register.
  */
 int pic32_ddr_size(void)
 {
-	uint32_t	*devcfg;
+	uint32_t devid = *(uint32_t*) DEVID;
 
-	devcfg = (uint32_t *) CONFIG_DEVCFG_3;
-	if (((*devcfg >> 16) & 0xF) == 5) {
-		return (32);
+	/* Devices which have 32Mbytes of internal SDRAM:
+	 * series DAG, DAH, DAR and DAS. For details, see table C-9
+	 * in PIC32 Flash Programming Specification, DS60001145W.
+	 */
+	switch (devid & 0x0fffffff) {
+	case 0x05F42053:	/* PIC32MZ1025DAG169 */
+	case 0x05F45053:        /* PIC32MZ1064DAG169 */
+	case 0x05F4B053:        /* PIC32MZ2025DAG169 */
+	case 0x05F4E053:        /* PIC32MZ2064DAG169 */
+	case 0x05FAE053:        /* PIC32MZ1025DAG176 */
+	case 0x05FB1053:        /* PIC32MZ1064DAG176 */
+	case 0x05FB7053:        /* PIC32MZ2025DAG176 */
+	case 0x05FBA053:        /* PIC32MZ2064DAG176 */
+
+	case 0x05F43053:        /* PIC32MZ1025DAH169 */
+	case 0x05F46053:        /* PIC32MZ1064DAH169 */
+	case 0x05F4C053:        /* PIC32MZ2025DAH169 */
+	case 0x05F4F053:        /* PIC32MZ2064DAH169 */
+	case 0x05FAF053:        /* PIC32MZ1025DAH176 */
+	case 0x05FB2053:        /* PIC32MZ1064DAH176 */
+	case 0x05FB8053:        /* PIC32MZ2025DAH176 */
+	case 0x05FBB053:        /* PIC32MZ2064DAH176 */
+
+	case 0x08A42053:        /* PIC32MZ1025DAR169 */
+	case 0x08A45053:        /* PIC32MZ1064DAR169 */
+	case 0x08A4B053:        /* PIC32MZ2025DAR169 */
+	case 0x08A4E053:        /* PIC32MZ2064DAR169 */
+	case 0x08AAE053:        /* PIC32MZ1025DAR176 */
+	case 0x08AB1053:        /* PIC32MZ1064DAR176 */
+	case 0x08AB7053:        /* PIC32MZ2025DAR176 */
+	case 0x08ABA053:        /* PIC32MZ2064DAR176 */
+
+	case 0x08A43053:        /* PIC32MZ1025DAS169 */
+	case 0x08A46053:        /* PIC32MZ1064DAS169 */
+	case 0x08A4C053:        /* PIC32MZ2025DAS169 */
+	case 0x08A4F053:        /* PIC32MZ2064DAS169 */
+	case 0x08AAF053:        /* PIC32MZ1025DAS176 */
+	case 0x08AB2053:        /* PIC32MZ1064DAS176 */
+	case 0x08AB8053:        /* PIC32MZ2025DAS176 */
+	case 0x08ABB053:        /* PIC32MZ2064DAS176 */
+		return 32;
 	}
 
-	return (128);
+	/* Others use external 128Mbytes of DDR2 memory. */
+	return 128;
 }
 
 void ddr_pmd_unlock(void)

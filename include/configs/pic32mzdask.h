@@ -23,9 +23,6 @@
 #define CONFIG_MIPS	        1
 #define CONFIG_MIPS32		1  /* MIPS32 CPU core	*/
 
-/* Configuration words */
-#define CONFIG_DEVCFG_3			0xbfc0ffc0
-
 /* Primary oscillator */
 #define CONFIG_PIC32_POSC_FREQ		24000000
 
