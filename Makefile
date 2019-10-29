@@ -1562,3 +1562,26 @@ FORCE:
 # Declare the contents of the .PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)
+
+boot.elf: $(srctree)/arch/mips/mach-pic32/boot.S
+		$(CC) -EL -march=mips32r2 -c $< -o arch/mips/mach-pic32/boot.o
+		$(LD) $(LDFLAGS) arch/mips/mach-pic32/boot.o -o $@ \
+			--defsym=UBOOT_BASE=$(CONFIG_SYS_TEXT_BASE) \
+			-Ttext=0xbfc00000
+
+boot.dis: boot.elf
+		$(OBJDUMP) -d $< > $@
+
+boot.bin: boot.elf
+		$(OBJCOPY) -O srec $< $@
+		$(OBJCOPY) -O elf32-tradlittlemips -j .text --gap-fill=0xff -O binary $< $@
+
+uboot.hex: u-boot.bin boot.bin
+		( srec_cat -output - -intel boot.bin -binary -offset 0x1FC00000; \
+		  srec_cat -output - -intel -gen 0x1FC0FFBC 0x1FC0FFC0 -l-e-const 0xF4FFFFFF 4; \
+                  srec_cat -output - -intel -gen 0x1FC0FFC0 0x1FC0FFC4 -l-e-const 0xFEF0FFFF 4; \
+                  srec_cat -output - -intel -gen 0x1FC0FFC4 0x1FC0FFC8 -l-e-const 0xF7F9B11A 4; \
+                  srec_cat -output - -intel -gen 0x1FC0FFC8 0x1FC0FFCC -l-e-const 0x5F74FCF9 4; \
+                  srec_cat -output - -intel -gen 0x1FC0FFCC 0x1FC0FFD0 -l-e-const 0xF7FFFFD3 4; \
+                ) | grep -v ':00000001FF' > $@
+		srec_cat -output - -intel u-boot.bin -binary -offset 0x1D004000 >> $@
